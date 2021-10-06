@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
+const { Connection } = require("pg");
 
 
 const app = express();
@@ -9,8 +10,41 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// app.use("/login", async(req, res) =>{
+//   try{
+//     const librarianKey = await pool.query("SELECT * FROM librarian ORDER BY librarian_id DESC limit 1");
+//     res.send(librarianKey.rows);
+//   }catch(err){
+//     console.log(err.message);
+//   }
+
+// });
+
+app.get('/login', function(req, res) {
+  console.log('object');
+  let {username} = req.body;
+  let {library_key} = req.body;
+  console.log(username);
+  console.log(library_key);
+  console.log(req.body);
+  let isValid = false;
+
+  const sql = `select * from librarian where username = $1 and library_key = $2`;  
+  const {rows} = pool.query(sql,[username,library_key])
+  .then(({rows})=>
+   {
+     console.log(rows);
+     res.send(rows)
+     res.sendStatus(200);
+   }).catch((err)=>{
+    res.sendStatus(404);
+     console.log(err)
+   })
+});
+
 
 //Routes
+
 
 //create a book
 
@@ -249,7 +283,6 @@ app.post("/addlibrarian", async (req, res) => {
 //get specific key by librarian_id
 app.get("/librarian", async(req, res) =>{
   try{
- 
     const librarianKey = await pool.query("SELECT * FROM librarian ORDER BY librarian_id DESC limit 1");
     res.json(librarianKey.rows);
   }catch(err){
@@ -257,6 +290,8 @@ app.get("/librarian", async(req, res) =>{
   }
 
 });
+
+
 
 
 
